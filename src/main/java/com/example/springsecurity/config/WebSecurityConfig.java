@@ -1,6 +1,8 @@
 package com.example.springsecurity.config;
 
 
+import com.example.springsecurity.security.CustomAccessDeniedHandler;
+import com.example.springsecurity.security.CustomAuthenticationEntryPoint;
 import com.example.springsecurity.security.CustomSecurityFilter;
 import com.example.springsecurity.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
 public class WebSecurityConfig {
 
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final UserDetailsServiceImpl userDetailsService;
 
     @Bean // 비밀번호 암호화 기능 등록
@@ -59,8 +63,14 @@ public class WebSecurityConfig {
         // Custom Filter 등록하기,  UsernameFilter 전에 CustomSecurityFilter가 실행됨
         http.addFilterBefore(new CustomSecurityFilter(userDetailsService, passwordEncoder()), UsernamePasswordAuthenticationFilter.class);
 
-        // 접근 제한 페이지 이동 설정
-        http.exceptionHandling().accessDeniedPage("/api/user/forbidden");
+//        // 접근 제한 페이지 이동 설정
+//        http.exceptionHandling().accessDeniedPage("/api/user/forbidden");
+
+        // 401 Error 처리, Authorization 즉, 인증과정에서 실패할 시 처리
+        http.exceptionHandling().authenticationEntryPoint(customAuthenticationEntryPoint);
+
+        // 403 Error 처리, 인증과는 별개로 추가적인 권한이 충족되지 않는 경우
+        http.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler);
 
         return http.build();
     }
