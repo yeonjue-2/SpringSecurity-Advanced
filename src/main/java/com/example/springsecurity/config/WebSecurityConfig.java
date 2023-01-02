@@ -41,11 +41,15 @@ public class WebSecurityConfig {
         // CSRF 설정
         http.csrf().disable();
 
-        http.authorizeRequests()
-                .anyRequest().authenticated();
+//        http.authorizeRequests()
+//                .anyRequest().authenticated();
 
         // 로그인 사용, 기본 폼 로그인 페이지와, user, password 제공
         // http.formLogin();
+
+        http.authorizeRequests().antMatchers("/api/user/**").permitAll()
+                .anyRequest().authenticated();
+
 
         // Custom 로그인 페이지 사용
         http.formLogin().loginPage("/api/user/login-page").permitAll();

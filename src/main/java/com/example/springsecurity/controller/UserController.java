@@ -1,7 +1,7 @@
 package com.example.springsecurity.controller;
 
 
-import com.example.springsecurity.dto.SignupRequest;
+import com.example.springsecurity.dto.SignupRequestDto;
 import com.example.springsecurity.entity.User;
 import com.example.springsecurity.entity.UserRoleEnum;
 import com.example.springsecurity.repository.UserRepository;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Optional;
-
 
 @Controller
 @RequiredArgsConstructor
@@ -38,10 +37,10 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public String signup(SignupRequest request) {
+    public String signup(SignupRequestDto signupRequestDto) {
 
-        String username = request.getUsername();
-        String password = passwordEncoder.encode(request.getPassword());
+        String username = signupRequestDto.getUsername();
+        String password = passwordEncoder.encode(signupRequestDto.getPassword());
 
         // 회원 중복 확인
         Optional<User> found = userRepository.findByUsername(username);
@@ -51,8 +50,8 @@ public class UserController {
 
         // 사용자 ROLE 확인
         UserRoleEnum role = UserRoleEnum.USER;
-        if (request.isAdmin()) {
-            if (!request.getAdminToken().equals(ADMIN_TOKEN)) {
+        if (signupRequestDto.isAdmin()) {
+            if (!signupRequestDto.getAdminToken().equals(ADMIN_TOKEN)) {
                 throw new IllegalArgumentException("관리자 암호가 틀려 등록이 불가능합니다.");
             }
             role = UserRoleEnum.ADMIN;
@@ -73,4 +72,5 @@ public class UserController {
 
         return "redirect:/api/user/login-page";
     }
+
 }
