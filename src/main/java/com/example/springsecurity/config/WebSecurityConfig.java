@@ -1,6 +1,9 @@
 package com.example.springsecurity.config;
 
 
+import com.example.springsecurity.security.CustomSecurityFilter;
+import com.example.springsecurity.security.UserDetailsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,10 +13,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
 public class WebSecurityConfig {
+
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Bean // 비밀번호 암호화 기능 등록
     public PasswordEncoder passwordEncoder() {
@@ -42,6 +49,9 @@ public class WebSecurityConfig {
 
         // Custom 로그인 페이지 사용
         http.formLogin().loginPage("/api/user/login-page").permitAll();
+
+        // Custom Filter 등록하기,  UsernameFilter 전에 CustomSecurityFilter가 실행됨
+        http.addFilterBefore(new CustomSecurityFilter(userDetailsService, passwordEncoder()), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
